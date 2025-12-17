@@ -1,0 +1,74 @@
+# Версионный контроль
+.git/
+.gitignore
+.gitattributes
+
+# Системные файлы
+.DS_Store
+Thumbs.db
+
+# IDE и редакторы
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Зависимости (языкозависимые)
+node_modules/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+
+# Артефакты сборки
+dist/
+build/
+target/
+*.jar
+*.war
+*.ear
+*.zip
+
+# Логи
+*.log
+logs/
+
+# Временные файлы
+tmp/
+temp/
+
+# Файлы окружения
+.env
+.env.local
+.env.*
+.dockerenv
+
+# Docker-файлы (кроме необходимых)
+docker-compose.override.yml
+Dockerfile.test
+
+# Документация
+README.md
+CHANGELOG.md
+LICENSE
+docs/
+
+# Тесты (если не нужны в образе)
+tests/
+test/
+coverage/
+.nyc_output/
+
+# Файлы с секретами
+*.pem
+*.key
+*.crt
+id_rsa*
+id_dsa*
+*.pub
+.secret*

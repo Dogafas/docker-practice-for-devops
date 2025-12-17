@@ -1,0 +1,95 @@
+# === Система ===
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# === Редакторы ===
+# Vim
+*.swp
+*.swo
+*~
+
+# VS Code
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+
+# IntelliJ
+.idea/
+*.iml
+*.iws
+*.ipr
+.idea_modules/
+
+# Sublime Text
+*.sublime-*
+
+# === Зависимости ===
+node_modules/
+bower_components/
+jspm_packages/
+
+# === Логи ===
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# === Сборка ===
+/dist/
+/build/
+/out/
+/target/
+*.class
+*.jar
+*.war
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# === Окружение ===
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.*.local
+
+# === Тестирование ===
+/coverage/
+.nyc_output/
+.pytest_cache/
+.junit.xml
+
+# === Операционные системы ===
+# Linux
+*~
+
+# Windows
+[Tt]humbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# === Секреты и ключи ===
+*.pem
+*.key
+*.crt
+id_rsa*
+id_dsa*
+id_ecdsa*
+id_ed25519*
+*.pub
+*.keystore
+*.jks
+firebase.json
+google-services.json
