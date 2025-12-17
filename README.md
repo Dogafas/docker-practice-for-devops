@@ -1,3 +1,3 @@
 # «Практическое применение Docker»
 ## Задача 0
-![alt text](image.png)
+![alt text](task_0.png)
