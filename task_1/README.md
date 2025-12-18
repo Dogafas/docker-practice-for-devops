@@ -1,96 +1,112 @@
-# shvirtd-example-python
+# Docker Practice — Task 1 (Автоматизированный стенд с Nginx (ingress), HAProxy (reverse‑proxy), Python FastAPI (web) и MySQL.)
 
-Учебный проект FastAPI-приложения для изучения Docker Compose.
+  
 
-## Описание проекта
+**В проекте демонстрируется:**
 
-Это простое веб-приложение на FastAPI, предназначенное для изучения контейнеризации и работы с Docker Compose. Приложение демонстрирует:
+ - работу нескольких прокси‑уровней
+ - статическую маршрутизацию через HAProxy
+ - динамическое создание Docker‑сети
+ - автоматическое назначение IP для backend
+ - автоматический запуск всех сервисов
+ - тестовый запрос после старта
+ 
 
-- Создание веб-сервиса на FastAPI
-- Подключение к базе данных MySQL
-- Работу с прокси-серверами (Nginx → HAProxy → FastAPI)
-- Корректную настройку сетей Docker
-- Передачу IP-адресов через заголовки прокси
+**Архитектура**
 
-### Функциональность
+    Client → Nginx (host mode) → HAProxy → Web (FastAPI) → MySQL
 
-При обращении к главной странице приложение:
-1. Определяет IP-адрес клиента
-2. Записывает время запроса и IP-адрес в базу данных MySQL
-3. Возвращает эту информацию пользователю
+**Компоненты:**
 
-**Важно для обучения:** Если обращаться к приложению напрямую (минуя прокси), вы получите подсказку о неправильном выполнении задания.
+|Сервис | Назначение |
+|-----------------|--|
+|      ingress-proxy           | Принимает HTTP‑запросы на localhost:8090 |
+| reverse-proxy | HAProxy, маршрутизирует запросы на web|
+|web FastAPI‑приложение|mysql База данных MySQL 8.0|
+| task_1_app_net | Внешняя Docker‑сеть с фиксированным IP для web |
 
-## Способы запуска
 
-### 1. Запуск через Docker Compose
+**Быстрый старт**
 
-**Архитектура при запуске через Docker Compose:**
-```
-Клиент → Nginx (8090) → HAProxy (8080) → FastAPI App (5000) → MySQL
-```
+Проект запускается одной командой:
 
-### 2. Локальный запуск для разработки
+    ./run.sh
 
-```bash
-# Создайте виртуальное окружение
-python3 -m venv venv
-source venv/bin/activate  # в Windows: venv\Scripts\activate
+**Скрипт сделает автоматически следующее:**
+1. Проверит существование сети task_1_app_net
+2. Создаст её, если нужно (подберёт свободную подсеть)
+3. С генерирует compose.generated.yaml с корректным IP
+4. Соберет Python‑образ
+5. Запустит все контейнеры
+6. Сделает тестовый HTTP‑запрос
+  
+**Как работает автоматическое назначение IP**
 
-# Установите зависимости
-pip install -r requirements.txt
+HAProxy требует фиксированный IP backend:
 
-# Настройте переменные окружения для подключения к БД(не забудьте отдельно запустить БД)
-export DB_HOST='127.0.0.1'
-export DB_USER='app'  
-export DB_PASSWORD='very_strong'
-export DB_NAME='example'
+    server web 172.20.0.5:5000
 
-# Запустите приложение
-uvicorn main:app --host 0.0.0.0 --port 5000 --reload
-```
+Однако на разных компьютерах подсеть 172.20.0.0/24 может быть занята. Поэтому:
 
-**Требования для локального запуска:**
-- Python 3.12+
-- Запущенный сервер MySQL
-- База данных и пользователь, настроенные согласно переменным окружения
+ - run.sh ищет свободную подсеть
+ - создаёт сеть task_1_app_net
+ - вычисляет IP .5 внутри выбранной подсети
+ - патчит compose.yaml → создаёт compose.generated.yaml
+ - запускает Docker Compose с этим файлом
 
-## Настройка базы данных MySQL
+Таким образом:
 
-```sql
-CREATE DATABASE example;
-CREATE USER 'app'@'localhost' IDENTIFIED BY 'very_strong';
-GRANT ALL PRIVILEGES ON example.* TO 'app'@'localhost';
-FLUSH PRIVILEGES;
-```
+ - web всегда получает IP .5
+ - HAProxy всегда работает
+ 
+**Переменные окружения (.env)**
 
-## Доступные эндпоинты
+> MYSQL_ROOT_PASSWORD=YtReWq4321
+> MYSQL_DATABASE=virtd
+> MYSQL_USER=app
+> MYSQL_PASSWORD=QwErTy1234
+> DB_HOST=mysql
+> DB_USER=app
+> DB_PASSWORD=QwErTy1234
+> DB_NAME=virtd
 
-- `GET /` - главная страница (записывает запрос в БД и возвращает время + IP)
-- `GET /requests` - просмотр всех записей из базы данных  
-- `GET /debug` - отладочная информация о заголовках запроса
-- `GET /docs` - автоматическая документация FastAPI (Swagger UI)
+Запуск вручную (если нужно)
 
-## Переменные окружения
+**Создать сеть:**
 
-| Переменная | Значение по умолчанию | Описание |
-|------------|----------------------|----------|
-| `DB_HOST` | `127.0.0.1` | Хост базы данных MySQL |
-| `DB_USER` | `app` | Пользователь БД |
-| `DB_PASSWORD` | `very_strong` | Пароль БД |
-| `DB_NAME` | `example` | Имя базы данных |
+    docker network create --subnet 172.20.0.0/24 task_1_app_net
 
-## Проверка работы
+**Запустить:**
 
-```bash
-# При правильной настройке через прокси
-curl http://localhost:8090
+    docker compose -f compose.generated.yaml up -d --build
 
-# При прямом обращении (НЕПРАВИЛЬНО) 
-curl http://localhost:5000  
-# Получите подсказку о том, что нужно использовать порт 8090
-```
+**Остановить:**
 
-## Лицензия
+  
 
-Этот проект распространяется под лицензией MIT (подробности в файле `LICENSE`).
+    docker compose -f compose.generated.yaml down --remove-orphans
+
+**Проверка работы**
+
+После запуска:
+
+    curl http://localhost:8090
+
+Ожидаемый ответ:
+  
+    "TIME: 2025-12-18 04:53:27, IP: 127.0.0.1"
+
+**Healthchecks**
+
+ - MySQL имеет встроенный healthcheck
+ - web стартует с задержкой, чтобы HAProxy не ловил 503  
+ - HAProxy автоматически определяет UP/DOWN backend
+
+**Используемые технологии:**
+ - Docker
+ - Docker Compose
+ - Python FastAPI
+ - MySQL 8.0
+ - HAProxy
+ - Nginx
+ - Bash automation
