@@ -9,6 +9,8 @@ services:
     networks:
       app_net:
         ipv4_address: 172.20.0.5
+    ports:
+      - "5000:5000"
     depends_on:
       mysql:
         condition: service_healthy
