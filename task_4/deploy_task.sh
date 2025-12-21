@@ -3,20 +3,24 @@ set -e
 
 REPO_URL="https://github.com/Dogafas/docker-practice-for-devops.git"
 BASE_DIR="/opt"
-PROJECT_DIR="$BASE_DIR/docker-practice-for-devops/task_3"
+PROJECT_ROOT="$BASE_DIR/docker-practice-for-devops"
+PROJECT_DIR="$PROJECT_ROOT/task_3"
 ENV_FILE="$PROJECT_DIR/.env"
 COMPOSE_FILE="$PROJECT_DIR/compose.yaml"
 
 echo "=== Deploy script started ==="
 
-echo "1. Клонирование репозитория..."
-if [ -d "$BASE_DIR/docker-practice-for-devops" ]; then
-    echo "Каталог уже существует, обновляю..."
-    sudo rm -rf "$BASE_DIR/docker-practice-for-devops"
+echo
+echo "1. Проверка существования каталога проекта..."
+if [ ! -d "$PROJECT_ROOT" ]; then
+    echo "Каталог отсутствует. Клонирую репозиторий..."
+    sudo git clone "$REPO_URL" "$PROJECT_ROOT"
+else
+    echo "Каталог существует. Обновляю код через git pull..."
+    cd "$PROJECT_ROOT"
+    sudo git reset --hard HEAD
+    sudo git pull --rebase
 fi
-
-sudo git clone "$REPO_URL" "$BASE_DIR/docker-practice-for-devops"
-echo "Репозиторий скачан."
 
 echo
 echo "2. Проверка .env..."
@@ -53,7 +57,9 @@ fi
 echo
 echo "4. Запуск Docker Compose..."
 cd "$PROJECT_DIR"
-sudo docker compose down -v || true
+
+# ВАЖНО: НЕ удаляем volumes, чтобы база не терялась
+sudo docker compose down || true
 sudo docker compose up -d --build
 
 echo
