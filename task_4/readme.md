@@ -1,4 +1,4 @@
-# Task 3 — Docker Compose, Nginx, HAProxy, FastAPI, MySQL
+# Task 4 — Docker Compose, Nginx, HAProxy, FastAPI, MySQL
 Этот проект поднимает инфраструктуру из четырёх сервисов:
 
 - ingress‑proxy (Nginx)
